@@ -200,6 +200,4 @@ MP-STRUCT-BCC/
 
 
 
-## License
 
-MIT
