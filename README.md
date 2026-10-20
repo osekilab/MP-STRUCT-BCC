@@ -13,8 +13,8 @@ This repository provides the minimal code to reproduce the four experimental con
 | Condition | PPT Data | Description |
 |-----------|----------|-------------|
 | **BL** (Baseline) | — | Standard pretraining, no PPT |
-| **SD** (k-Shuffle Dyck) | `k_shuffle_dyck.py` | Hierarchical structure via cross-serial dependencies (k=64; Hu et al., 2025) |
-| **MS** (MP-STRUCT) | `mp_struct.py` | Fixed English-like typological parameters |
+| **SD** (k-Shuffle Dyck) | `k_shuffle_dyck.py` | Hierarchical structure via cross-serial dependencies (k=64; Hu et al., ACL2025) |
+| **MS** (MP-STRUCT) | `mp_struct.py` | Fixed English-like typological parameters (Mita et al., ACL2026)|
 | **BCC** (MP-STRUCT BCC) | `mp_struct_bcc.py` | Sampled typological profiles following the Borer–Chomsky Conjecture |
 
 All conditions use GPT-2 small (124M parameters), 500 PPT steps, and 100M words × 10 epochs of trilingual (English/Dutch/Chinese) pretraining data from BabyLM 2026.
@@ -204,7 +204,7 @@ MP-STRUCT-BCC/
 @inproceedings{mita-etal-2026-linguistically,
     title = "Linguistically Inspired Multilingual Pre-Pretraining",
     author = "Mita, Masato and M{\"u}ller-Eberstein, Max and Yamaguchi, Misaki and Oseki, Yohei",
-    booktitle = "Proceedings of the BabyLM Workshop at the 2026 Conference on Empirical Methods in Natural Language Processing",
+    booktitle = "Proceedings of the BabyLM Workshop 2026",
     year = "2026",
 }
 ```
