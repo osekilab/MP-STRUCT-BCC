@@ -68,7 +68,6 @@ class DPNode:
 @dataclass
 class VLex:
     v: str
-    # sel_order: Tuple[str, str] = ("d","d") # Not used, removed
 
 @dataclass
 class TVLex:
@@ -268,18 +267,16 @@ def check_brackets(tokens: List[str]):
         if t == "[": depth += 1
         elif t == "]": depth -= 1
         if depth < 0: raise ValueError("Unbalanced brackets (extra ']')")
-    # if depth != 0 and "[" in tokens:
-    #     raise ValueError(f"Unbalanced brackets: depth={depth}")
     
 
 # -----------------------------
-# 長さ調整付き Derivation (ロジック統合)
+# Fixed-length derivation
 # -----------------------------
 def build_fixed_length_derivation(
     rng: random.Random,
     sg_list: List[str], pl_list: List[str],
     verbs: List[str], dets: List[str],
-    agree_match: bool, # New name for 'pos'
+    agree_match: bool,
     num_prior: float,
     p_wh_goal: float,
     p_c_wh: float,
@@ -294,7 +291,6 @@ def build_fixed_length_derivation(
     while len(toks) < max_length:
         # 1. Lexical Selection and Base Structure
         subj_num = "sg" if rng.random() < num_prior else "pl"
-        # If agree_match=True (Positive example), subj_num == obj_num
         obj_num  = subj_num if agree_match else ("pl" if subj_num == "sg" else "sg")
 
         subj = DPNode(det=rng.choice(dets), noun=rng.choice(sg_list if subj_num=="sg" else pl_list),
@@ -321,7 +317,7 @@ def build_fixed_length_derivation(
             wh_move(CP)
             
         # 3. Linearization
-        # VPの線形化の語順をランダムに決定 (V-Obj-Subj vs V-Subj-Obj)
+        # Randomize VP linearization order
         pos_v_obj_subj = rng.random() < 0.5
         
         current_toks = lin_CP(CP, enable_merge=enable_merge, pos_v_obj_subj=pos_v_obj_subj)
@@ -387,7 +383,7 @@ def save_vocab(vocab: Dict[str,int], out_dir: str):
 def generate_mg_sentences(
     file_dir: str,
     n: int = 100000,
-    agree_match_ratio: float = 1.0, # Renamed from pos_ratio
+    agree_match_ratio: float = 1.0,
     num_prior: float = 0.5,
     seed: int = 0,
     lex_dir: str | None = None,
@@ -435,13 +431,12 @@ def generate_mg_sentences(
          open(out_txt, "w", encoding="utf-8") if also_write_text else open(os.devnull, "w") as ftxt:
 
         for i in trange(n, desc=f"MG derivations (len={max_length}, merge={enable_merge})"):
-            # agree_match=True: Subject Num == Object Num (Positive example for a number-agreement task)
-            agree_match = (rng.random() < agree_match_ratio) 
-            
+            agree_match = (rng.random() < agree_match_ratio)
+
             toks = build_fixed_length_derivation(
                 rng,
                 sg_list, pl_list, verbs, dets,
-                agree_match=agree_match, # New variable name
+                agree_match=agree_match,
                 num_prior=num_prior,
                 p_wh_goal=p_wh_goal,
                 p_c_wh=p_c_wh if allow_move else 0.0,

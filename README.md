@@ -120,7 +120,7 @@ python training.py \
 ```bash
 python training.py \
     --dataset en_nld_zho_equal \
-    --ppt_data_path data/ppt/mp_struct_universal/universal_v5_p1_ids.txt \
+    --ppt_data_path data/ppt/mp_struct_universal/bcc_ids.txt \
     --ppt_steps 500 --ppt_learning_rate 0.0005 --ppt_warmup_steps 100 \
     --words_per_epoch 100000000 \
     --experiment_name bcc_seed42 \

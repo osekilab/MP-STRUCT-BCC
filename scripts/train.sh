@@ -62,7 +62,7 @@ echo "  [BCC] MP-STRUCT BCC, seed=${SEED}"
 echo "=========================================="
 python training.py \
     --dataset "$DATASET" \
-    --ppt_data_path "${PPT_DIR}/mp_struct_universal/universal_v5_p1_ids.txt" \
+    --ppt_data_path "${PPT_DIR}/mp_struct_universal/bcc_ids.txt" \
     --ppt_steps 500 \
     --ppt_learning_rate 0.0005 \
     --ppt_warmup_steps 100 \

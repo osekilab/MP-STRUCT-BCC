@@ -1,4 +1,4 @@
-"""MP-STRUCT Universal: Formal language generator with featural parameterization.
+"""MP-STRUCT BCC: Formal language generator with typological parameterization.
 
 Extends MP-STRUCT by parameterizing the featural composition of functional
 heads (C, T, v, Top) across typological profiles, following the
@@ -19,20 +19,10 @@ Variable featural properties of functional heads (per sentence):
   - T phi-feature set: full (Num+Per) / partial (Num) / null
   - Top EPP feature: active (topic prominence) vs inactive
 
-Versions:
-  v1: Base (profile_prob=0.5, simple structure)
-  v2: profile_prob=1.0 + relative clauses + deeper embedding
-  v4: v2 + language-specific operations (Dutch verb clusters,
-      Chinese classifiers/aspect/topic chains)
-  v5: Landmark-enhanced (strip lexical items, fix transitive frame,
-      maximize functional landmark clarity). Based on Mita+2026 finding
-      that dependency identification ambiguity reduction is the key driver.
-
 Usage:
-  python -m ppt.mp_struct_universal --seed 42
-  python -m ppt.mp_struct_universal --profile_prob 1.0 --enable_rc
-  python -m ppt.mp_struct_universal --profile_prob 1.0 --enable_rc --enable_lang_specific
-  python -m ppt.mp_struct_universal --strip_lexical
+  python -m ppt.mp_struct_universal \\
+      --num_sentences 100000 --max_length 1024 \\
+      --profile_prob 1.0 --strip_lexical --seed 42
 """
 
 import random
@@ -105,21 +95,19 @@ _LEX_START = 37
 _N_LEX = 20
 # Tokens 37-56: abstract lexical items
 
-# --- v2+: Structural complexity tokens ---
+# --- Structural complexity tokens ---
 REL = 57            # Relative clause marker
 
-# --- v4+: Language-specific tokens ---
+# --- Language-specific tokens ---
 VCLUST = 58         # Verb cluster marker (Dutch)
 CL_CLASSIFIER = 59  # Classifier (Chinese)
-ASP_PERF = 60       # Perfective aspect (Chinese: 了-like)
-ASP_PROG = 61       # Progressive aspect (Chinese: 在-like)
-ASP_EXP = 62        # Experiential aspect (Chinese: 过-like)
+ASP_PERF = 60       # Perfective aspect (Chinese)
+ASP_PROG = 61       # Progressive aspect (Chinese)
+ASP_EXP = 62        # Experiential aspect (Chinese)
 TOPIC_CHAIN = 63    # Topic chain continuation (Chinese)
 
-VOCAB_SIZE_V1 = 57
-VOCAB_SIZE_V2 = 58
-VOCAB_SIZE_V4 = 64
-VOCAB_SIZE_V5 = 37  # No abstract lexical items
+VOCAB_SIZE = 37     # When strip_lexical=True (no abstract lexical items)
+VOCAB_SIZE_FULL = 64
 
 
 # ============================================================
@@ -175,13 +163,9 @@ def sample_parameters(rng, profile_prob=0.5, lang=None):
 
     Args:
         rng: Random number generator.
-        profile_prob: Probability of sampling from a known profile.
-            When lang is also set, controls the ratio of lang-specific
-            vs random parameters (1.0 = 100% lang, 0.7 = 70% lang).
-        lang: If set ('english', 'dutch', 'chinese'), bias toward that
-            profile. With profile_prob=1.0 (default for --lang), always
-            uses the specified profile. With profile_prob<1.0, mixes
-            the lang profile with random parameter sampling.
+        profile_prob: Probability of sampling from a known profile
+            vs. independent parameter sampling.
+        lang: If set, fix to a single language profile.
     """
     if lang is not None:
         if profile_prob >= 1.0 or rng.random() < profile_prob:
@@ -217,7 +201,7 @@ def _make_dp(rng, role, agreement, is_wh=False,
     tokens = [DP_O, H_D, role]
     feats = {}
 
-    # Chinese classifier (v4): D + CL + N
+    # Chinese classifier: D + CL + N
     lang = params.get('lang', 'mixed') if params else 'mixed'
     if enable_lang and lang == 'chinese' and rng.random() < 0.4:
         tokens.append(CL_CLASSIFIER)
@@ -240,7 +224,7 @@ def _make_dp(rng, role, agreement, is_wh=False,
         tokens.append(F_WH)
         feats['wh'] = True
 
-    # Relative clause (v2+): DP-internal CP modifier
+    # Relative clause: DP-internal CP modifier
     if enable_rc and depth < 2 and not is_wh and rng.random() < 0.20:
         rc_lang = params.get('lang') if params and params.get('lang', 'mixed') in PROFILES else None
         rc_params = sample_parameters(rng, profile_prob, lang=rc_lang)
@@ -312,12 +296,12 @@ def generate_clause(rng, params, embedded=False, depth=0,
     # ---- VP: V + internal arguments ----
     v_head = [H_V] if strip_lexical else [H_V, verb_lex]
 
-    # Chinese aspect marker (v4): post-verbal aspect
+    # Chinese aspect marker: post-verbal aspect
     if enable_lang and lang == 'chinese' and rng.random() < 0.4:
         asp = rng.choice([ASP_PERF, ASP_PROG, ASP_EXP])
         v_head.append(asp)
 
-    # Dutch verb cluster (v4): auxiliary/modal + main verb in clause-final
+    # Dutch verb cluster: auxiliary/modal + main verb in clause-final
     has_vclust = False
     if enable_lang and lang == 'dutch' and hd['VP'] == 'final' and rng.random() < 0.35:
         has_vclust = True
@@ -386,7 +370,7 @@ def generate_clause(rng, params, embedded=False, depth=0,
 
     # ---- Optional TopP ----
     if topic and rng.random() < 0.5:
-        # Chinese topic chains (v4): multiple stacked TopPs
+        # Chinese topic chains: multiple stacked TopPs
         if enable_lang and lang == 'chinese':
             n_topics = rng.choices([1, 2, 3], weights=[0.50, 0.35, 0.15])[0]
         else:
@@ -469,15 +453,13 @@ def generate(
         profile_prob: Probability of sampling from a known typological
             profile (English/Dutch/Chinese) vs. independent parameter
             sampling. 0.0 = fully random, 1.0 = only target profiles.
-        enable_rc: Enable relative clauses and deeper embedding (v2+).
+        enable_rc: Enable relative clauses and deeper embedding.
         enable_lang_specific: Enable language-specific operations:
-            Dutch verb clusters, Chinese classifiers/aspect/topic chains (v4).
+            Dutch verb clusters, Chinese classifiers/aspect/topic chains.
         strip_lexical: Remove abstract lexical items and fix transitive
-            frame (v5). Maximizes functional landmark clarity for
-            dependency identification.
+            frame. Maximizes functional landmark clarity.
         lang: Fix all sentences to a single language profile
             ('english', 'dutch', 'chinese'). Overrides profile_prob.
-            For monolingual L1 experiments.
         seed: Random seed.
     """
     if lang is not None and lang not in PROFILES:
@@ -487,17 +469,9 @@ def generate(
     path = os.path.join(output_dir, output_file)
 
     if strip_lexical:
-        vocab_size = VOCAB_SIZE_V5
-        version = "v5"
-    elif enable_lang_specific:
-        vocab_size = VOCAB_SIZE_V4
-        version = "v4"
-    elif enable_rc:
-        vocab_size = VOCAB_SIZE_V2
-        version = "v2"
+        vocab_size = VOCAB_SIZE
     else:
-        vocab_size = VOCAB_SIZE_V1
-        version = "v1"
+        vocab_size = VOCAB_SIZE_FULL
 
     counts = {
         'head_init_vp': 0, 'head_final_vp': 0,
@@ -511,7 +485,7 @@ def generate(
 
     lang_label = f", lang={lang}" if lang else ""
     with open(path, 'w') as f:
-        for _ in trange(num_sentences, desc=f"Generating MP-STRUCT Universal ({version}{lang_label})"):
+        for _ in trange(num_sentences, desc=f"Generating MP-STRUCT BCC{lang_label}"):
             params = sample_parameters(rng, profile_prob, lang=lang)
             tokens = generate_sentence(rng, params, max_length, profile_prob,
                                        enable_rc=enable_rc,
@@ -540,10 +514,9 @@ def generate(
 
     n = num_sentences
     print(f"\n{'='*55}")
-    print(f"  MP-STRUCT Universal ({version}) — Generation Complete")
+    print(f"  MP-STRUCT BCC — Generation Complete")
     print(f"{'='*55}")
     print(f"  Output:          {path}")
-    print(f"  Version:         {version}")
     print(f"  Features:        RC={enable_rc}, LangSpecific={enable_lang_specific}, StripLex={strip_lexical}")
     print(f"  Sentences:       {n:,}")
     print(f"  Total tokens:    {total_tokens:,}")
