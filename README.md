@@ -4,7 +4,7 @@ Code and scripts for reproducing the main experiments in:
 
 > **Linguistically Inspired Multilingual Pre-Pretraining**
 > Masato Mita, Max Müller-Eberstein, Misaki Yamaguchi, Yohei Oseki
-> BabyLM Workshop @ ACL 2026
+> BabyLM Workshop @ EMNLP2026
 
 ## Overview
 
