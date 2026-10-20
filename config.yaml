@@ -1,0 +1,29 @@
+{
+"tokenizer_dir" : "tokenizers",
+"config_dir" : "configs",
+"data_dir" : "data",
+
+"datapoint_length" : 512,
+"dataset" : "en_nld_zho_equal",
+"words_per_epoch" : 100000000,
+"n_epochs" : 10,
+"batch_size" : 16,
+
+"learning_rate" : 0.00005,
+"weight_decay" : 0,
+"warmup_ratio" : 0.01,
+"gradient_clip_norm" : 1,
+"seed" : -1,
+
+"base_folder" : "experiments",
+"experiment_name" : "testing",
+
+"ppt_data_path" : null,
+"ppt_steps" : 500,
+"ppt_learning_rate" : 0.0005,
+"ppt_warmup_steps" : 100,
+
+"use_wandb" : False,
+"wandb_experiment_name" : "experiment_name",
+"wandb_project_name" : "babylm_gpt2",
+}
