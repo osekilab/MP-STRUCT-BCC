@@ -198,16 +198,7 @@ MP-STRUCT-BCC/
     └── evaluate.sh              # BLiMP evaluation
 ```
 
-## Citation
 
-```bibtex
-@inproceedings{mita-etal-2026-linguistically,
-    title = "Linguistically Inspired Multilingual Pre-Pretraining",
-    author = "Mita, Masato and M{\"u}ller-Eberstein, Max and Yamaguchi, Misaki and Oseki, Yohei",
-    booktitle = "Proceedings of the BabyLM Workshop at the 64th Annual Meeting of the Association for Computational Linguistics",
-    year = "2026",
-}
-```
 
 ## License
 
