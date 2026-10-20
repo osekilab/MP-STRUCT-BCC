@@ -25,7 +25,7 @@ echo ""
 echo "=========================================="
 echo "  [MS] MP-STRUCT"
 echo "=========================================="
-python -m ppt.minimalist_grammar_v3 generate_mg_sentences \
+python -m ppt.mp_struct generate_mg_sentences \
     --file_dir "${PPT_DIR}/mp_struct" \
     --n 100000 \
     --max_length 1024 \
@@ -37,7 +37,7 @@ echo ""
 echo "=========================================="
 echo "  [BCC] MP-STRUCT BCC (profile_prob=1.0, strip_lexical)"
 echo "=========================================="
-python -m ppt.mp_struct_universal \
+python -m ppt.mp_struct_bcc \
     --num_sentences 100000 \
     --max_length 1024 \
     --output_dir "${PPT_DIR}/mp_struct_universal" \
