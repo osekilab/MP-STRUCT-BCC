@@ -13,8 +13,8 @@ This repository provides the minimal code to reproduce the four experimental con
 | Condition | PPT Data | Description |
 |-----------|----------|-------------|
 | **BL** (Baseline) | — | Standard pretraining, no PPT |
-| **SD** (k-Shuffle Dyck) | `k_shuffle_dyck.py` | Hierarchical structure via cross-serial dependencies (k=64; Hu et al., 2025) |
-| **MS** (MP-STRUCT) | `minimalist_grammar_v3.py` | Fixed English-like typological parameters |
+| **SD** (k-Shuffle Dyck) | `k_shuffle_dyck.py` | Hierarchical structure via cross-serial dependencies (k=64; Hu et al., ACL2025) |
+| **MS** (MP-STRUCT) | `minimalist_grammar_v3.py` | Fixed English-like typological parameters (Mita et al.,ACL2026 )|
 | **BCC** (MP-STRUCT BCC) | `mp_struct_universal.py` | Sampled typological profiles following the Borer–Chomsky Conjecture |
 
 All conditions use GPT-2 small (124M parameters), 500 PPT steps, and 100M words × 10 epochs of trilingual (English/Dutch/Chinese) pretraining data from BabyLM 2026.
